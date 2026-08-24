@@ -53,16 +53,16 @@ def build_prompt(query_text, retrieved):
             f"- {r['brand']} {r['model']} | {r['category']} | {r['processor']} | "
             f"{r['ram_gb']}GB RAM | {r['price_bdt']} BDT | {chunk_text}"
         )
-    context = "\\n".join(context_lines)
+    context = "\n".join(context_lines)
     
-    return f\"\"\"You are a device recommendation assistant. Only use the CONTEXT below -- do not invent devices, specs, or prices that are not listed.
+    return f"""You are a device recommendation assistant. Only use the CONTEXT below -- do not invent devices, specs, or prices that are not listed.
 
 CONTEXT:
 {context}
 
 USER QUERY: {query_text}
 
-Recommend the best matching device(s) from the CONTEXT above, with a short justification tied to the user's stated needs. If nothing in CONTEXT fits well, say so honestly instead of guessing.\"\"\"
+Recommend the best matching device(s) from the CONTEXT above, with a short justification tied to the user's stated needs. If nothing in CONTEXT fits well, say so honestly instead of guessing."""
 
 def rag_recommend(query_text, index, df, k=5, category=None, max_price_bdt=None, brand=None):
     retrieved = retrieve(query_text, index, df, k, category, max_price_bdt, brand)
