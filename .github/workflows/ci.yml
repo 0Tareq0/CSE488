@@ -9,9 +9,6 @@ on:
 jobs:
   backend-lint-and-test:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./backend
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
@@ -24,13 +21,10 @@ jobs:
           pip install -r requirements.txt
       - name: Test with pytest
         run: |
-          python -m pytest
+          python -m pytest backend/tests
 
   frontend-build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./frontend
     steps:
       - uses: actions/checkout@v4
       - name: Use Node.js
