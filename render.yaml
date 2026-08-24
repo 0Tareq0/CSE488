@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: device-recommender-api
+    env: docker
+    dockerfilePath: backend/Dockerfile
+    dockerContext: .
+    plan: free
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false # Set this manually in Render dashboard
+      - key: GROQ_MODEL
+        value: llama-3.3-70b-versatile
+      - key: ALLOWED_ORIGINS
+        value: "*" # Change this to your frontend URL in production
+      - key: PARQUET_PATH
+        value: "/app/notebook/output/devices_embeddings.parquet"
