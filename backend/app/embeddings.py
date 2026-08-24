@@ -1,4 +1,5 @@
 import os
+os.environ["HF_HOME"] = "/tmp"
 
 _embedding_model = None
 
