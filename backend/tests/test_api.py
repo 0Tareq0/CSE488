@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 @pytest.fixture(autouse=True)
 def setup_dummy_data():
-    import app.faiss_index
+    import backend.app.faiss_index as faiss_index
     # Create small dummy dataset
     df = pd.DataFrame([
         {
@@ -28,40 +28,42 @@ def setup_dummy_data():
             "embedding": np.random.rand(384).tolist()
         }
     ])
-    app.faiss_index._df_cache = df
-    app.faiss_index._index_cache = {}
+    faiss_index._df_cache = df
+    faiss_index._index_cache = {}
     
-    with patch("app.main.get_embedding_model"):
+    with patch("backend.app.main.get_embedding_model"):
         yield
 
-from app.main import app
+from backend.app.main import app
 
 client = TestClient(app)
 
 def test_health():
-    response = client.get("/health")
+    response = client.get("/api/health")
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
 
 def test_get_devices():
-    response = client.get("/devices")
+    response = client.get("/api/devices")
     assert response.status_code == 200
     data = response.json()
     assert "devices" in data
     assert len(data["devices"]) == 1
     assert data["devices"][0]["brand"] == "TestBrand"
 
-@patch("app.rag.get_groq_client")
-@patch("app.rag.embed_query")
-def test_recommend(mock_embed, mock_get_groq):
+@patch("backend.app.rag.get_groq_client")
+@patch("backend.app.rag.extract_constraints")
+@patch("backend.app.rag.embed_query")
+def test_recommend(mock_embed, mock_extract, mock_get_groq):
     mock_embed.return_value = np.random.rand(1, 384).astype("float32")
+    mock_extract.return_value = {"category": None, "max_price_bdt": None, "brand": None}
     # Mock groq response
     mock_client = mock_get_groq.return_value
     mock_response = mock_client.chat.completions.create.return_value
     mock_response.choices = [type('obj', (object,), {'message': type('obj', (object,), {'content': 'I recommend TestBrand TestModel X.'})})]
 
     response = client.post(
-        "/recommend", 
+        "/api/recommend", 
         json={"query": "test phone", "category": "Mobile"},
         params={"index_type": "Flat"}
     )
