@@ -1,14 +1,11 @@
---extra-index-url https://download.pytorch.org/whl/cpu  
-torch==2.2.2+cpu  
 fastapi  
 uvicorn  
 pandas  
 numpy  
 faiss-cpu  
-sentence-transformers  
 groq  
 pydantic  
 pydantic-settings  
 pytest  
 httpx  
-pyarrow 
+pyarrow
