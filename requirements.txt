@@ -1,0 +1,11 @@
+fastapi  
+uvicorn  
+pandas  
+numpy  
+faiss-cpu  
+groq  
+pydantic  
+pydantic-settings  
+pytest  
+httpx  
+pyarrow
