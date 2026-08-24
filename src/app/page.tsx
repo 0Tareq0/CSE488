@@ -14,6 +14,7 @@ interface Device {
   display: string;
   battery: string | null;
   price_bdt: number;
+  source_dataset?: string;
   chunk_text?: string;
 }
 
@@ -22,6 +23,7 @@ export default function Home() {
   const [category, setCategory] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [brand, setBrand] = useState("");
+  const [topK, setTopK] = useState(5);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [messages, setMessages] = useState<{ role: "user" | "assistant"; content: string; devices?: Device[] }[]>([]);
@@ -29,7 +31,7 @@ export default function Home() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -54,10 +56,15 @@ export default function Home() {
           category: category || null,
           max_price_bdt: maxPrice ? parseFloat(maxPrice) : null,
           brand: brand || null,
+          k: topK,
         }),
       });
 
       if (!response.ok) {
+        const errData = await response.json().catch(() => null);
+        if (errData && errData.detail) {
+          throw new Error(errData.detail);
+        }
         throw new Error("Failed to fetch recommendation");
       }
 
@@ -124,6 +131,15 @@ export default function Home() {
               value={maxPrice}
               onChange={(e) => setMaxPrice(e.target.value)}
             />
+            <select
+              className="border p-2 rounded flex-1 text-black"
+              value={topK}
+              onChange={(e) => setTopK(parseInt(e.target.value))}
+            >
+              <option value={3}>Top 3</option>
+              <option value={5}>Top 5</option>
+              <option value={10}>Top 10</option>
+            </select>
           </div>
 
           {/* Chat History */}
@@ -145,6 +161,9 @@ export default function Home() {
                           <p><strong>Processor:</strong> {device.processor}</p>
                           <p><strong>RAM:</strong> {device.ram_gb} GB</p>
                           <p><strong>Storage:</strong> {device.storage_gb} GB</p>
+                          {device.source_dataset && (
+                            <p className="text-xs text-gray-400 mt-2"><strong>Source:</strong> {device.source_dataset}</p>
+                          )}
                         </div>
                         <button 
                           onClick={() => toggleComparison(device)}

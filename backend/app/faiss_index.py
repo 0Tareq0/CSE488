@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 
 # Use an environment variable for the parquet path to allow local and docker testing
-PARQUET_PATH = os.getenv("PARQUET_PATH", os.path.join(os.path.dirname(__file__), "../../notebook/output/devices_embeddings.parquet"))
+PARQUET_PATH = os.getenv("PARQUET_PATH", os.path.join(os.path.dirname(__file__), "../../api/data/devices_embeddings.parquet"))
 
 _df_cache = None
 _index_cache = {}

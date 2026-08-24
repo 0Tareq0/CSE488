@@ -1,86 +1,36 @@
-# Device Recommender Full-Stack App
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-This is a RAG-based expert system for Mobile/Laptop recommendations. The project is organized as a monorepo containing both a FastAPI backend (with FAISS indexing and Groq LLM integration) and a Next.js frontend.
+## Getting Started
 
-## Architecture
+First, run the development server:
 
-- **`/notebook`**: Contains the original data preparation and pipeline notebook, as well as the output Parquet file with generated embeddings.
-- **`/backend`**: FastAPI application that provides recommendation endpoints. It reads the pre-computed Parquet file, builds a FAISS index in memory (defaulting to HNSW for low latency), and queries the Groq API for grounded recommendations.
-- **`/frontend`**: Next.js App Router application providing a chat-style interface and a device comparison view.
-- **`.github/workflows`**: Basic CI pipeline that runs backend tests and frontend build checks.
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
 
-## How to Run Locally
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-### 1. Backend
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-1. Navigate to the backend directory:
-   ```bash
-   cd backend
-   ```
-2. Create a virtual environment and install dependencies:
-   ```bash
-   python -m venv venv
-   # Windows: .\venv\Scripts\activate
-   # Linux/Mac: source venv/bin/activate
-   pip install -r requirements.txt
-   ```
-3. Set your Groq API key:
-   Create a `.env` file in the `/backend` directory:
-   ```env
-   GROQ_API_KEY=your_api_key_here
-   GROQ_MODEL=llama-3.3-70b-versatile
-   ALLOWED_ORIGINS=http://localhost:3000
-   ```
-4. Make sure the notebook output file exists at `notebook/output/devices_embeddings.parquet` (run the notebook if it's missing).
-5. Start the backend:
-   ```bash
-   uvicorn app.main:app --reload --port 8000
-   ```
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-### 2. Frontend
+## Learn More
 
-1. Navigate to the frontend directory:
-   ```bash
-   cd frontend
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Set the backend URL in a `.env.local` file:
-   ```env
-   NEXT_PUBLIC_API_URL=http://localhost:8000
-   ```
-4. Start the development server:
-   ```bash
-   npm run dev
-   ```
-5. Open [http://localhost:3000](http://localhost:3000) to view the application.
+To learn more about Next.js, take a look at the following resources:
 
-## How to Deploy
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-### Deploying the Backend (Render / Railway)
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-**Render:**
-1. Connect your GitHub repository to Render.
-2. Create a new "Web Service".
-3. Render should automatically detect the `render.yaml` file in the root and configure the service (using `backend/Dockerfile` and setting the Docker context to the root directory).
-4. **Manual Step**: In the Render dashboard for the new service, add your `GROQ_API_KEY` to the Environment Variables.
+## Deploy on Vercel
 
-**Railway:**
-1. Connect your GitHub repository to Railway.
-2. Create a new service from the repository.
-3. Configure the Root Directory to `/` and Builder to Dockerfile, pointing to `backend/Dockerfile`.
-4. Add the `GROQ_API_KEY` to the service variables.
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-### Deploying the Frontend (Vercel)
-
-1. Import your GitHub repository into Vercel.
-2. Set the "Framework Preset" to **Next.js**.
-3. Set the "Root Directory" to `frontend`.
-4. Add the Environment Variable `NEXT_PUBLIC_API_URL` and set it to the URL of your deployed backend service.
-5. Click **Deploy**.
-
-## Testing
-
-Backend tests can be run using `pytest` inside the `backend` directory.
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

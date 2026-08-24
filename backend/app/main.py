@@ -41,11 +41,11 @@ def startup_event():
     load_or_build_index()
     get_device_df()
 
-@app.get("/health")
+@app.get("/api/health")
 def health_check():
     return {"status": "ok"}
 
-@app.post("/recommend", response_model=RecommendResponse)
+@app.post("/api/recommend", response_model=RecommendResponse)
 def recommend(req: RecommendRequest, index_type: str = Query("HNSW")):
     try:
         import time
@@ -78,7 +78,7 @@ def recommend(req: RecommendRequest, index_type: str = Query("HNSW")):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/devices")
+@app.get("/api/devices")
 def list_devices(page: int = 1, page_size: int = 20):
     df = get_device_df()
     start = (page - 1) * page_size
@@ -86,7 +86,7 @@ def list_devices(page: int = 1, page_size: int = 20):
     devices = df.iloc[start:end].replace({float('nan'): None}).to_dict(orient="records")
     return {"devices": devices, "total": len(df)}
 
-@app.get("/devices/{device_id}")
+@app.get("/api/devices/{device_id}")
 def get_device(device_id: int):
     df = get_device_df()
     device = df[df["device_id"] == device_id]

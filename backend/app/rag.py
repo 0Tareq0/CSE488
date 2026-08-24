@@ -8,7 +8,7 @@ GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
 def get_groq_client():
     api_key = os.getenv("GROQ_API_KEY")
     if not api_key:
-        raise ValueError("GROQ_API_KEY is not set")
+        raise ValueError("Groq API key is not configured.")
     return Groq(api_key=api_key)
 
 def metadata_filter(df, category=None, max_price_bdt=None, brand=None):
@@ -45,6 +45,8 @@ def retrieve(query_text, index, df, k=5, category=None, max_price_bdt=None, bran
     
     return candidates.head(k)
 
+from .constraints import extract_constraints
+
 def build_prompt(query_text, retrieved):
     context_lines = []
     for _, r in retrieved.iterrows():
@@ -55,28 +57,52 @@ def build_prompt(query_text, retrieved):
         )
     context = "\n".join(context_lines)
     
-    return f"""You are a device recommendation assistant. Only use the CONTEXT below -- do not invent devices, specs, or prices that are not listed.
+    return f"""You are a device recommendation assistant.
 
-CONTEXT:
+You may ONLY recommend devices contained in the RETRIEVED DEVICES section.
+
+Never invent a device, specification, price, benchmark, feature, or review.
+
+If the retrieved data does not support a claim, do not make that claim.
+
+Use the user's query to compare the retrieved devices.
+
+Return:
+- recommended device
+- price in BDT
+- key reasons
+- relevant specifications
+- brief comparison when useful
+
+The retrieved devices are authoritative.
+
+RETRIEVED DEVICES:
 {context}
 
-USER QUERY: {query_text}
-
-Recommend the best matching device(s) from the CONTEXT above, with a short justification tied to the user's stated needs. If nothing in CONTEXT fits well, say so honestly instead of guessing."""
+USER QUERY: {query_text}"""
 
 def rag_recommend(query_text, index, df, k=5, category=None, max_price_bdt=None, brand=None):
-    retrieved = retrieve(query_text, index, df, k, category, max_price_bdt, brand)
+    client = get_groq_client()
+    
+    # Extract constraints if they are not explicitly provided
+    constraints = extract_constraints(query_text, client, GROQ_MODEL)
+    
+    # Use explicit arguments if provided (e.g. from UI filters), otherwise fallback to extracted
+    final_category = category or constraints.get("category")
+    final_max_price = max_price_bdt or constraints.get("max_price_bdt")
+    final_brand = brand or constraints.get("brand")
+    
+    retrieved = retrieve(query_text, index, df, k, final_category, final_max_price, final_brand)
     
     if retrieved.empty:
         return {
-            "answer": "I couldn't find any devices matching your criteria in the database.",
+            "answer": "No matching device was found in the dataset.",
             "retrieved": retrieved,
             "prompt": ""
         }
         
     prompt = build_prompt(query_text, retrieved)
     
-    client = get_groq_client()
     response = client.chat.completions.create(
         model=GROQ_MODEL,
         messages=[{"role": "user", "content": prompt}],
