@@ -66,8 +66,12 @@ export default function Home() {
         ...prev,
         { role: "assistant", content: data.answer, devices: data.retrieved_devices },
       ]);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError(String(err));
+      }
     } finally {
       setLoading(false);
     }
