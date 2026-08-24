@@ -56,3 +56,4 @@ notebook/data/*.csv
 # Editor
 .vscode/
 .idea/
+testenv/
